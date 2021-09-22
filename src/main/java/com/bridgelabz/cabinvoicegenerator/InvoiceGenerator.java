@@ -11,5 +11,12 @@ public class InvoiceGenerator {
 	            return MIN_FARE;
 	            return totalFare;
 	    }
+	    public double calculateFare(Rides[] rides) {
+	        double totalFare = 0;
+	        for (Rides ride:rides) {
+	            totalFare =totalFare+ this.calculateFare(ride.getDistance(), ride.getTime());
+	        }
+	        return totalFare;
+	    }
 
 }
