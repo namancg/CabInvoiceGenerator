@@ -1,32 +1,29 @@
 package com.bridgelabz.cabinvoicegenerator;
 
+import java.util.Arrays;
+
 public class InvoiceGenerator {
-	  private static final double MINIMUM_COST_PER_KILOMETER = 10;
-	    private static final int COST_PER_TIME = 1;
-	    private static final int MIN_FARE = 5;
+	 private static final double MIN_COST_PER_KM_NORMAL_RIDE = 10;
+	    private static final int COST_PER_TIME_NORMAL_RIDE = 1;
+	    private static final double MIN_FARE_NORMAL_RIDE = 5;
+	    private static final double MIN_COST_PER_KM_PREMIUM_RIDE = 15;
+	    private static final int COST_PER_TIME_PREMIUM_RIDE = 2;
+	    private static final double MIN_FARE_PREMIUM_RIDE = 20;
 	    private RideRepository rideRepository;
+	    double totalFare =0;
 	    public InvoiceGenerator() {
 	        this.rideRepository = new RideRepository();
 	    }
-	    public double calculateFare(double distance, int time) {
-	        double totalFare = distance*MINIMUM_COST_PER_KILOMETER+time*COST_PER_TIME;
-	        if (totalFare< MIN_FARE)
-	            return MIN_FARE;
-	            return totalFare;
+	    public enum RideType {
+	        NORMAL, PREMIUM
 	    }
-	    public double calculateFare(Rides[] rides) {
-	        double totalFare = 0;
-	        for (Rides ride:rides) {
-	            totalFare =totalFare+ this.calculateFare(ride.getDistance(), ride.getTime());
-	        }
-	        return totalFare;
+	    public double calculateFare(double distance, int time, RideType rideType) {
+	        return this.calculateBasedOnRideType(distance, time, rideType);
 	    }
 	    public InvoiceSummary calculateTotalFare(Rides[] rides) {
-	        double totalFare = 0;
-	        for (Rides ride:rides) {
-	            totalFare += this.calculateFare(ride.getDistance(), ride.getTime());
-	           
-	        }
+	    	double totalFare = Arrays.stream(rides)
+	                .mapToDouble(ride -> this.calculateFare(ride.getDistance(), ride.getTime(), ride.getRideType()))
+	                .sum();
 	        return new InvoiceSummary(rides.length, totalFare);
 	    }
 	    public void addRides(String userId, Rides[] rides) {
@@ -34,6 +31,20 @@ public class InvoiceGenerator {
 	    }
 	    public InvoiceSummary getInvoiceSummary(String userId) {
 	        return this.calculateTotalFare(rideRepository.getRides(userId));
+	    }
+	    public double calculateBasedOnRideType(double distance, int time, RideType rideType) 
+	    {
+	        if(rideType == RideType.PREMIUM)
+	        {
+	        	return totalFare = Math.max(distance * MIN_COST_PER_KM_PREMIUM_RIDE + time * COST_PER_TIME_PREMIUM_RIDE,
+		                    MIN_FARE_PREMIUM_RIDE);	
+	        }
+	        else if(rideType == RideType.NORMAL) {
+	           
+	           return totalFare= Math.max(distance * MIN_COST_PER_KM_NORMAL_RIDE + time * COST_PER_TIME_NORMAL_RIDE,
+	                    MIN_FARE_NORMAL_RIDE);
+	        }
+			return time;
 	    }
 	    
 
